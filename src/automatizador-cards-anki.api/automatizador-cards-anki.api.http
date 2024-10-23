@@ -1,0 +1,6 @@
+@automatizador_cards_anki.api_HostAddress = http://localhost:5115
+
+GET {{automatizador_cards_anki.api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

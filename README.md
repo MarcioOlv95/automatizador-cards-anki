@@ -1,0 +1,1 @@
+# automatizador-cards-anki
