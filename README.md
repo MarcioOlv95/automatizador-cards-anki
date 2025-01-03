@@ -4,7 +4,7 @@
 	<img src="https://img.shields.io/badge/Framework-dotnet-blue"/> 
 	<img src="https://img.shields.io/badge/Framework%20version-dotnet%208-blue"/> 
 	<img src="https://img.shields.io/badge/Language-C%23-blue"/> 
-	<img src="https://img.shields.io/badge/Status-development-green"/>  
+	<img src="https://img.shields.io/badge/Status-development-green"/>
 </p>
 
 Esta é uma Web API feita em .NET 8 para automatizar a criação de cards no meu Anki que auxilia nos meus estudos de inglês. <br/><br/>

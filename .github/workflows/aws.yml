@@ -1,0 +1,47 @@
+name: Push-to-EC2
+on:
+  push:
+    branches:
+    - master
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: Windows
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+  
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '8.0.*'
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.5
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build with dotnet
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Stop IIS
+      run: |
+        Start-Process -FilePath "iisreset" -ArgumentList "/stop" -Verb RunAs
+      shell: powershell
+
+    - name: dotnet publish
+      run: dotnet publish -c Release -o C:\inetpub\wwwroot\automatizador-cards-anki
+
+    - name: Start IIS
+      run: |
+        Start-Process -FilePath "iisreset" -ArgumentList "/start" -Verb RunAs
+      shell: powershell
+
