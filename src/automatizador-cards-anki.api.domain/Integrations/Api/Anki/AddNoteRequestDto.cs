@@ -25,8 +25,8 @@ public class Note
     public Field fields { get; set; }
     public Option options { get; set; } = new();
     public List<string> Tags { get; set; } = [];
-    public MediaFile Audio { get; set; } = new();
-    public MediaFile Video { get; set; } = new();
+    public MediaFile Audio { get; set; }
+    public List<MediaFile> picture { get; set; } = [];
 
     public Note(string deckName, string modelName, Field fields)
     {
@@ -65,7 +65,19 @@ public class DuplicateScopeOption
 public class MediaFile
 {
     public string url { get; set; } = string.Empty;
-    public string fileName { get; set; } = string.Empty;
-    public string skipHash {  get; set; } = string.Empty;
+    public string filename { get; set; } = string.Empty;
     public List<string> fields { get; set; } = [];
+
+    public MediaFile(string url, string fileName, List<string> fields)
+    {
+        this.url = url;
+        this.filename = fileName;
+        this.fields = fields;
+    }
+
+    public MediaFile(string url, List<string> fields)
+    {
+        this.url = url;
+        this.fields = fields;
+    }
 }

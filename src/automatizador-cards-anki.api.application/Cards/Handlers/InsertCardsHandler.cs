@@ -1,4 +1,5 @@
 ﻿using automatizador_cards_anki.api.application.Cards.Messaging.Requests;
+using automatizador_cards_anki.api.domain.Entities;
 using automatizador_cards_anki.api.domain.Integrations.Api.Anki;
 using automatizador_cards_anki.api.domain.Integrations.Api.OpenAi;
 using automatizador_cards_anki.api.domain.Shared;
@@ -16,7 +17,8 @@ public class InsertCardsHandler : IRequestHandler<InsertCardsRequest, Result>
     private readonly string DECK_NAME;
     private const int ANKI_VERSION = 6;
     private const string QUESTION_CHAT_MEANING_PHRASES =  
-        "Give me the meaning and one simple phrase with the word {0}.";
+        "Give me the meaning and one simple phrase with the word: {0}.";
+    private const string QUESTION_CHAT_MEANING_IMAGE = "Give me a image that describe the meaning of the word: {0}";
 
     public InsertCardsHandler(IOpenAiApiManager openAiApiManager, IAnkiApiManager ankiApiManager, IConfiguration configuration)
     {
@@ -44,9 +46,9 @@ public class InsertCardsHandler : IRequestHandler<InsertCardsRequest, Result>
         }
     }
 
-    private async Task<List<(string, string, string)>> GetNotesToAnkiAsync(InsertCardsRequest request, CancellationToken cancellationToken)
+    private async Task<List<CardAnki>> GetNotesToAnkiAsync(InsertCardsRequest request, CancellationToken cancellationToken)
     {
-        List<(string, string, string)> inputAnki = [];
+        List<CardAnki> cardsAnki = [];
 
         foreach (var word in request.Words)
         {
@@ -60,20 +62,20 @@ public class InsertCardsHandler : IRequestHandler<InsertCardsRequest, Result>
                                         .Replace("meaning:", string.Empty)
                                         .Replace("simple", string.Empty);
 
-            var card =
-            (
-                word,
-                answerChatGpt.Substring(0, answerChatGpt.IndexOf("phrase:")).Trim(),
-                answerChatGpt.Substring(answerChatGpt.IndexOf("phrase:") + "phrase:".Length).Trim()
-            );
+            var image = await _openAiApiManager.GenerateImageAsync(string.Format(QUESTION_CHAT_MEANING_IMAGE, word));
 
-            inputAnki.Add(card);
+            var cardAnki = new CardAnki(word, 
+                                        answerChatGpt.Substring(answerChatGpt.IndexOf("phrase:") + "phrase:".Length).Trim(),
+                                        answerChatGpt.Substring(0, answerChatGpt.IndexOf("phrase:")).Trim(),
+                                        image);
+
+            cardsAnki.Add(cardAnki);
         }
 
-        return inputAnki;
+        return cardsAnki;
     }
 
-    private async Task<AnkiResponse> AddNotesToAnkiAsync(List<(string, string, string)> notes, CancellationToken cancellationToken)
+    private async Task<AnkiResponse> AddNotesToAnkiAsync(List<CardAnki> notes, CancellationToken cancellationToken)
     {
         var noteRequestDto = new AddNoteRequestDto("addNotes", ANKI_VERSION);
 
@@ -81,11 +83,16 @@ public class InsertCardsHandler : IRequestHandler<InsertCardsRequest, Result>
 
         foreach (var item in notes)
         {
-            var fields = new Field(ToFirstLetterUpperCase(item.Item3.Replace(item.Item1, $"<b>{item.Item1}</b>")), 
-                            $"<b>{item.Item1}</b><br>{ToFirstLetterUpperCase(item.Item2)}");
+            var fields = new Field(ToFirstLetterUpperCase(item.Phrase.Replace(item.Word, $"<b>{item.Word}</b>")), 
+                            $"<b>{item.Word}</b><br>{ToFirstLetterUpperCase(item.Meaning)}<br>");
 
             var note = new Note(DECK_NAME, "Basic", fields);
             note.options.allowDuplicate = true;
+
+            if (!string.IsNullOrEmpty(item.UrlImage))
+            {
+                note.picture.Add(new(item.UrlImage, item.Word + ".png", ["Back"]));
+            }
 
             notesToParams.Add(note);
         }

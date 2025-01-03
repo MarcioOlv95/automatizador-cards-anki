@@ -1,6 +1,7 @@
 ﻿using automatizador_cards_anki.api.domain.Integrations.Api.OpenAi;
 using Microsoft.Extensions.Configuration;
 using OpenAI_API;
+using OpenAI_API.Images;
 using OpenAI_API.Models;
 
 namespace automatizador_cards_anki.api.integrations.azure_openai;
@@ -34,5 +35,17 @@ public class OpenAiApiManager : IOpenAiApiManager
         {
             throw;
         }
+    }
+
+    public async Task<string> GenerateImageAsync(string question)
+    {
+        var request = new ImageGenerationRequest(question, Model.DALLE3, ImageSize._1024);
+
+        var chat = await _openAiApi.ImageGenerations.CreateImageAsync(request);
+
+        if (chat?.Data is not null && chat.Data.Count != 0)
+            return chat.Data.First().Url;
+
+        return default;
     }
 }

@@ -7,6 +7,9 @@ namespace automatizador_cards_anki.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status500InternalServerError)]
     public class AnkiController : ControllerBase
     {
         protected readonly ISender _sender;
@@ -16,10 +19,7 @@ namespace automatizador_cards_anki.api.Controllers
             _sender = sender;
         }
 
-        [HttpPost("insert-cards")]
-        [ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Result), StatusCodes.Status500InternalServerError)]
+        [HttpPost("insert-cards")]        
         public async Task<Result> InserirCardsAnkiAsync(InsertCardsRequest words, CancellationToken cancellationToken)
         {
             return await _sender.Send(words, cancellationToken);

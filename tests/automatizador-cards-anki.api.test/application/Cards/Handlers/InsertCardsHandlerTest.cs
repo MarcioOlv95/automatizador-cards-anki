@@ -15,7 +15,8 @@ public class InsertCardsHandlerTest
     private readonly Mock<IAnkiApiManager> _ankiApiManager = new();
     private readonly InsertCardsHandler _insertCardsHandler;
     private const string QUESTION_CHAT_MEANING_PHRASES =
-        "Give me the meaning and one simple phrase with the word {0}.";
+        "Give me the meaning and one simple phrase with the word: {0}.";
+    private const string QUESTION_CHAT_MEANING_IMAGE = "Give me a image that describe the meaning of the word: {0}";
     private readonly Fixture _fixture = new();
 
     public InsertCardsHandlerTest()
@@ -39,9 +40,13 @@ public class InsertCardsHandlerTest
         foreach (var word in request.Words)
         {
             var response = $"meaning: {word}. phrase: {word}";
+            var responseUrlImage = _fixture.Create<string>();
 
             _openAiApiManager.Setup(x => x.CreateConversationAsync(string.Format(QUESTION_CHAT_MEANING_PHRASES, word), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(response);
+
+            _openAiApiManager.Setup(x => x.GenerateImageAsync(string.Format(QUESTION_CHAT_MEANING_IMAGE, word)))
+                .ReturnsAsync(responseUrlImage);
         }
 
         var noteRequestDto = _fixture.Create<AddNoteRequestDto>();

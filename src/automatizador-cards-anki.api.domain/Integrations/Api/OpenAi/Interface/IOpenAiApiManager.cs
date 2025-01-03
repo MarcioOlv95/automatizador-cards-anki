@@ -3,4 +3,5 @@
 public interface IOpenAiApiManager
 {
     Task<string> CreateConversationAsync(string question, CancellationToken cancellationToken);
+    Task<string> GenerateImageAsync(string question);
 }
