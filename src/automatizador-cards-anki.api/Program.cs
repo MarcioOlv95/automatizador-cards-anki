@@ -1,20 +1,19 @@
-using automatizador_cards_anki.api.integrations.azure_openai;
 using automatizador_cards_anki.api.application.Common;
-using automatizador_cards_anki.api.integrations.anki;
-using automatizador_cards_anki.api.domain.Integrations.Api.OpenAi;
-using automatizador_cards_anki.api.domain.Integrations.Api.Anki;
-using automatizador_cards_anki.api.application.Cards.Validators;
-using FluentValidation.AspNetCore;
+using Serilog;
+using automatizador_cards_anki.api.Middleware;
+using automatizador_cards_anki.api.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, loggerConfig) =>
+    loggerConfig.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(AssemblyReference.Assembly));
-builder.Services.AddScoped<IOpenAiApiManager, OpenAiApiManager>();
-builder.Services.AddScoped<IAnkiApiManager, AnkiApiManager>();
-builder.Services.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<InsertCardsRequestValidator>());
+
+builder.Services.ResolveDependencies();
 
 builder.Services.AddCors(options =>
 {
@@ -35,6 +34,10 @@ app.UseSwaggerUI();
 app.UseCors();
 
 app.UseHttpsRedirection();
+
+app.UseSerilogRequestLogging();
+
+app.UseRequestLog();
 
 app.UseAuthorization();
 

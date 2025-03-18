@@ -64,20 +64,20 @@ public class DuplicateScopeOption
 
 public class MediaFile
 {
-    public string url { get; set; } = string.Empty;
+    public string path { get; set; } = string.Empty;
     public string filename { get; set; } = string.Empty;
     public List<string> fields { get; set; } = [];
 
-    public MediaFile(string url, string fileName, List<string> fields)
+    public MediaFile(string path, string fileName, List<string> fields)
     {
-        this.url = url;
+        this.path = path;
         this.filename = fileName;
         this.fields = fields;
     }
 
-    public MediaFile(string url, List<string> fields)
+    public MediaFile(string path, List<string> fields)
     {
-        this.url = url;
+        this.path = path;
         this.fields = fields;
     }
 }

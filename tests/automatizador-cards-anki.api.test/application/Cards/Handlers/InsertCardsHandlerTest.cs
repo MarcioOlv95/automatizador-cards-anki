@@ -4,7 +4,9 @@ using automatizador_cards_anki.api.application.Cards.Messaging.Requests;
 using automatizador_cards_anki.api.domain.Integrations.Api.Anki;
 using automatizador_cards_anki.api.domain.Integrations.Api.OpenAi;
 using automatizador_cards_anki.api.domain.Shared;
+using automatizador_cards_anki.api.domain.Shared.Interface;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Shouldly;
 
 namespace automatizador_cards_anki.api.test.application.Cards.Handlers;
@@ -13,11 +15,14 @@ public class InsertCardsHandlerTest
 {
     private readonly Mock<IOpenAiApiManager> _openAiApiManager = new();
     private readonly Mock<IAnkiApiManager> _ankiApiManager = new();
+    private readonly Mock<ILogger<InsertCardsHandler>> _logger = new();
+    private readonly Mock<IImageService> _imageService = new();
     private readonly InsertCardsHandler _insertCardsHandler;
     private const string QUESTION_CHAT_MEANING_PHRASES =
         "Give me the meaning and one simple phrase with the word: {0}.";
     private const string QUESTION_CHAT_MEANING_IMAGE = "Give me a image that describe the meaning of the word: {0}";
     private readonly Fixture _fixture = new();
+    private readonly Mock<HttpClient> httpClient = new();
 
     public InsertCardsHandlerTest()
     {
@@ -29,7 +34,12 @@ public class InsertCardsHandlerTest
             .AddInMemoryCollection(inMemorySettings)
             .Build();
 
-        _insertCardsHandler = new InsertCardsHandler(_openAiApiManager.Object, _ankiApiManager.Object, configuration);
+        _insertCardsHandler = new InsertCardsHandler(
+            _openAiApiManager.Object, 
+            _ankiApiManager.Object, 
+            configuration, 
+            _logger.Object,
+            _imageService.Object);
     }
 
     [Fact]
@@ -40,13 +50,16 @@ public class InsertCardsHandlerTest
         foreach (var word in request.Words)
         {
             var response = $"meaning: {word}. phrase: {word}";
-            var responseUrlImage = _fixture.Create<string>();
+            var responseUrlImage = "https://www.google.com.br";
 
             _openAiApiManager.Setup(x => x.CreateConversationAsync(string.Format(QUESTION_CHAT_MEANING_PHRASES, word), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(response);
 
             _openAiApiManager.Setup(x => x.GenerateImageAsync(string.Format(QUESTION_CHAT_MEANING_IMAGE, word)))
                 .ReturnsAsync(responseUrlImage);
+
+            _imageService.Setup(x => x.ResizeImageAsync(responseUrlImage, word))
+                .ReturnsAsync(It.IsAny<string>());
         }
 
         var noteRequestDto = _fixture.Create<AddNoteRequestDto>();
