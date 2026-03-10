@@ -47,10 +47,12 @@ public class InsertCardsHandler : IRequestHandler<InsertCardsRequest, Result>
     {
         try
         {
-            await Task.WhenAll(
-                AddNotesToAnkiAsync
-                (GetNotesToAnkiAsync(request, cancellationToken).Result, cancellationToken), 
-                SyncAnkiWebAsync(cancellationToken));
+            var notes = await GetNotesToAnkiAsync(request, cancellationToken);
+
+            var addNotesTask = AddNotesToAnkiAsync(notes, cancellationToken);
+            var syncTask = SyncAnkiWebAsync(cancellationToken);
+
+            await Task.WhenAll(addNotesTask, syncTask);
 
             await RemoveFilesAsync();
 
@@ -136,7 +138,7 @@ public class InsertCardsHandler : IRequestHandler<InsertCardsRequest, Result>
 
     private async Task RemoveFilesAsync()
     {
-        var pathImages = Path.Combine(Directory.GetCurrentDirectory()!.ToString(), FOLDER_NAME);
+        var pathImages = Path.Combine(Directory.GetCurrentDirectory(), FOLDER_NAME);
 
         if (Directory.Exists(pathImages))
             Directory.Delete(pathImages, true);

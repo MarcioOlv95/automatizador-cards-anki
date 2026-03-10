@@ -12,7 +12,7 @@ public class ImageService : IImageService
 
     public async Task<string> ResizeImageAsync(string url, string word)
     {
-        var pathImages = Path.Combine(Directory.GetCurrentDirectory()!.ToString(), FOLDER_NAME);
+        var pathImages = Path.Combine(Directory.GetCurrentDirectory(), FOLDER_NAME);
 
         if (!Directory.Exists(pathImages))
             Directory.CreateDirectory(pathImages);
