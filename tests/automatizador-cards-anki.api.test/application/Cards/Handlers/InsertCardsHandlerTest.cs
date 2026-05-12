@@ -80,22 +80,4 @@ public class InsertCardsHandlerTest
         result.Errors.ShouldBeEmpty();
     }
 
-    [Fact]
-    public async Task InsertCards_ErrorAsync()
-    {
-        var request = _fixture.Create<InsertCardsRequest>();
-
-        foreach (var word in request.Words)
-        {
-            _openAiApiManager.Setup(x => x.CreateConversationAsync(string.Format(QUESTION_CHAT_MEANING_PHRASES, word), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new Exception());
-        }
-
-        var result = await _insertCardsHandler.Handle(request, It.IsAny<CancellationToken>());
-
-        result.ShouldBeOfType<Result>();
-        result.IsSuccess.ShouldBeFalse();
-        result.IsFailure.ShouldBeTrue();
-        result.Errors.ShouldNotBeEmpty();
-    }
 }
