@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.9.34902.65
+# Visual Studio Version 18
+VisualStudioVersion = 18.7.11925.98 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "automatizador-cards-anki.api", "src\automatizador-cards-anki.api\automatizador-cards-anki.api.csproj", "{174E0EEC-7857-45AE-82CA-F6DE4512D1E7}"
 EndProject
@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{171C68C2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "automatizador-cards-anki.api.integrations", "src\automatizador-cards-anki.api.integrations\automatizador-cards-anki.api.integrations.csproj", "{98FA0EFD-7140-4AB9-A43D-8122D53EC0B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "automatizador-cards-anki.api.test", "tests\automatizador-cards-anki.api.test\automatizador-cards-anki.api.test.csproj", "{68E3F056-D532-4CE2-AE0F-1E8FB43F1F2D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "automatizador-cards-anki.api.application.test", "tests\automatizador-cards-anki.api.test\automatizador-cards-anki.api.application.test.csproj", "{68E3F056-D532-4CE2-AE0F-1E8FB43F1F2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

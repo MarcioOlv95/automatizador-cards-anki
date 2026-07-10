@@ -1,51 +1,28 @@
-﻿using automatizador_cards_anki.api.domain.Integrations.Api.OpenAi;
+﻿using automatizador_cards_anki.api.domain.Helper;
+using automatizador_cards_anki.api.domain.Integrations.Api.OpenAi;
+using automatizador_cards_anki.api.domain.Integrations.Api.OpenAi.Interface;
 using Microsoft.Extensions.Configuration;
-using OpenAI_API;
-using OpenAI_API.Images;
-using OpenAI_API.Models;
+using OpenAI;
+using OpenAI.Images;
 
-namespace automatizador_cards_anki.api.integrations.azure_openai;
+namespace automatizador_cards_anki.api.integrations.openai;
 
-public class OpenAiApiManager : IOpenAiApiManager
+public class OpenAiApiManager(IConfiguration configurattion) : IOpenAiApiManager
 {
-    private readonly OpenAIAPI _openAiApi;
-    private readonly IConfiguration _configuration;
-    private readonly string CHAVE_ACESSO;
+    private readonly OpenAIClient _client = new(configurattion.GetSection("Chaves:OpenAi").Value!);
+    private readonly ImageClient _imageClient = new("gpt-image-1", configurattion.GetSection("Chaves:OpenAi").Value!);
 
-    public OpenAiApiManager(IConfiguration configurattion)
+    public async Task<ConversationResponse> CreateConversationAsync(string question, CancellationToken ct)
     {
-        _configuration = configurattion;
-        CHAVE_ACESSO = _configuration.GetValue<string>("Chaves:OpenAi");
-        _openAiApi = new OpenAIAPI(CHAVE_ACESSO);
+        var response = await _client.GetChatClient("gpt-5.5").CompleteChatAsync(question);
+
+        return new ConversationResponse { Text = response.Value?.Content[0]?.Text! };
     }
 
-    public async Task<string> CreateConversationAsync(string question, CancellationToken cancellationToken)
+    public async Task<string> GenerateImageUriAsync(string question, string word, CancellationToken ct)
     {
-        try
-        {
-            var chat = _openAiApi.Chat.CreateConversation();
-            chat.Model = Model.ChatGPTTurbo;
-            chat.RequestParameters.Temperature = 1;
-            chat.AppendUserInput(question);
-            var response = await chat.GetResponseFromChatbotAsync();
+        var result = await _imageClient.GenerateImageAsync(question, cancellationToken: ct);
 
-            return response;
-        }
-        catch
-        {
-            throw;
-        }
-    }
-
-    public async Task<string> GenerateImageAsync(string question)
-    {
-        var request = new ImageGenerationRequest(question, Model.DALLE3, ImageSize._1024);
-
-        var chat = await _openAiApi.ImageGenerations.CreateImageAsync(request);
-
-        if (chat?.Data is not null && chat.Data.Count != 0)
-            return chat.Data.First().Url;
-
-        return default;
+        return ImageHelper.SaveToPathAndGetUri(result.Value.ImageBytes.ToArray(), word);
     }
 }

@@ -6,16 +6,9 @@ using System.Text;
 
 namespace automatizador_cards_anki.api.integrations.anki;
 
-public class AnkiApiManager : IAnkiApiManager
+public class AnkiApiManager(IConfiguration configuration) : IAnkiApiManager
 {
-    private readonly IConfiguration _configuration;
-    private readonly string ENDPOINT;
-
-    public AnkiApiManager(IConfiguration configuration)
-    {
-        _configuration = configuration;
-        ENDPOINT = _configuration.GetValue<string>("Apis:Anki");
-    }
+    private readonly string ENDPOINT = configuration.GetSection("Apis:Anki").Value!;
 
     public async Task<AnkiResponse> RequestAnkiAsync<T>(T request, CancellationToken cancellationToken)
     {

@@ -1,7 +1,7 @@
-﻿namespace automatizador_cards_anki.api.domain.Integrations.Api.OpenAi;
+﻿namespace automatizador_cards_anki.api.domain.Integrations.Api.OpenAi.Interface;
 
 public interface IOpenAiApiManager
 {
-    Task<string> CreateConversationAsync(string question, CancellationToken cancellationToken);
-    Task<string> GenerateImageAsync(string question);
+    Task<ConversationResponse> CreateConversationAsync(string question, CancellationToken cancellationToken);
+    Task<string> GenerateImageUriAsync(string question, string word, CancellationToken cancellationToken);
 }
